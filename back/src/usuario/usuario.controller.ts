@@ -13,8 +13,8 @@ export class UsuarioController {
   }
 
   @Get()
-  findAll() {
-    return this.usuarioService.findAll();
+  async findAll() {
+    return await this.usuarioService.findAll();
   }
 
   @Get(':id')
