@@ -15,7 +15,7 @@
 
 # Requisitos do Front-End
 
-[] Desenvolvido em HTML, CSS e JavaScript puro – sem frameworks
+[] Desenvolvido em HTML, CSS ou JavaScript
 [] Consumir a API
 [] Ter tela de cadastro e login de usuário
 [] Exibir, criar, editar e remover os recursos principais da aplicação
