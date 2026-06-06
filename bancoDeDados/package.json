@@ -1,0 +1,8 @@
+{
+  "name": "trabalho-final",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "neo4j-driver": "^5.28.3"
+  }
+}

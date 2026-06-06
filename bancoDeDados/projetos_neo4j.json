@@ -1,0 +1,129 @@
+{
+  "projetos": [
+    {
+      "tipo": "Extensao",
+      "nome": "Interlocução entre a universidade e a educação de jovens e adultos",
+      "coordenador": "Nilda Gonçalves Vieira Santiago",
+      "alunos": [
+        "Ana Cristina Miguel da Silva",
+        "Anna Clara Cardoso Lima",
+        "Byanka Lívia Ferreira Santos",
+        "Carla Patrícia Elias Silva",
+        "Elaine Martins da Silva",
+        "Evelen Lorrana Pinheiro Costa",
+        "Franciely Silva da Costa Santana",
+        "Gabriella Lauany Gondim de Castro",
+        "Geovanna Rosa",
+        "Igor Cipriano Gomes",
+        "Izabella Lauane Messias de Jesus",
+        "Kaique Maciel Brito Cabral",
+        "Kelly Cristina dos Santos Raposo",
+        "Maria Clara Aparecida da Silva Soares",
+        "Maria Clara Souza",
+        "Maria Eduarda de Faria Silva",
+        "Nayra Gonçalves Campos",
+        "Tainá Pereira Lira Kuster",
+        "Tatianne Isabela Leandro e Silva",
+        "Thainara Morais Silva",
+        "Zyon Ferraz Salgado"
+      ]
+    },
+    {
+      "tipo": "Pesquisa",
+      "nome": "Lei nº 14.945/2024: avanços e desafios para o Ensino Médio ofertado nas redes estaduais de ensino",
+      "coordenador": "Luís Duarte Vieira",
+      "alunos": [
+        "Keyde Taisa da Silva",
+        "Carla Patrícia Elias Silva",
+        "Felipe da Silva Rabelo",
+        "Higor Gabriel de Siqueira Mendes",
+        "Fernanda Campos Oliveira"
+      ]
+    },
+    {
+      "tipo": "Extensao",
+      "nome": "Cirandas em defesa da democracia, da proteção, do projeto de vida, da ecologia e da vida das mulheres",
+      "coordenador": "Luís Duarte Vieira",
+      "alunos": [
+        "Anna Luisa Mayer Silva Borges",
+        "Daniele Candido Ribeiro",
+        "Felipe Da Silva Rabelo",
+        "Francisca Maria Teixeira Da Silva",
+        "Giulia Vitoria Pereira",
+        "Isabelle Lemes Fernandes",
+        "Jaqueline Campelo Da Silva Passos",
+        "Luciene Alves Da Silva Ribeiro",
+        "Pabline Cristina Souza Siqueira",
+        "Vitoria Maria Diniz Pereira"
+      ]
+    },
+    {
+      "tipo": "Extensao",
+      "nome": "Capacitação em desenvolvimento",
+      "coordenador": "Natan de Souza Rodrigues",
+      "alunos": [
+        "Andreia Aparecida Ribeiro Mendes",
+        "Caio Campos Justino",
+        "Jhonatan Leite Malaquias",
+        "Josélia Mendes Almeida",
+        "Keyde Taisa Da Silva",
+        "Loiane De Souza Vicente",
+        "Samuel Gomes Dos Santos"
+      ]
+    },
+    {
+      "tipo": "Extensao",
+      "nome": "Inteligência Artificial Generativa",
+      "coordenador": "Natan de Souza Rodrigues",
+      "alunos": [
+        "Caio Campos Justino",
+        "Eliesio Xavier Junior",
+        "Gustavo Borges Sousa",
+        "Gustavo Henrique Costa Pinto",
+        "Izaque Gabriel Monteiro",
+        "Jhonatan Leite Malaquias",
+        "Keyde Taisa Da Silva",
+        "Luan Santos Cavalcante",
+        "Luis Felipe Morais",
+        "Maria Alice Santos Sousa",
+        "Matheus Henrique Do Couto",
+        "Peterson Silva Ribeiro",
+        "Samuel Gomes Dos Santos",
+        "Victor Acacio Camargo Pacheco",
+        "Ygor Emanoel B De Sousa"
+      ]
+    },
+    {
+      "tipo": "Pesquisa",
+      "nome": "Avaliação de Avatars no processo de validação de requisitos para crianças surdas",
+      "coordenador": "Lucas Rodrigues de Oliveira",
+      "alunos": [
+        "Victor Hugo Ribeiro Barro",
+        "Luis Felipe Morais",
+        "Eliesio Xavier Júnior",
+        "Jhonatan Leite Malaquias",
+        "Pablo Dias Delmondes",
+        "Diego Rodrigues Inocencio",
+        "Pedro Henrique Quixabeira de Oliveira Teles",
+        "Vitória Maria Diniz Pereira",
+        "Gustavo Henrique Costa Pinto",
+        "Isabelle Lemes Fernandes",
+        "Danielle Candido Ribeiro"
+      ]
+    },
+    {
+      "tipo": "Extensao",
+      "nome": "Educação e tecnologia: caminhos para a programação web",
+      "coordenador": "Ricardo Bruno Oses de Oliveira",
+      "alunos": [
+        "Bartolomeu Spegiorin Gusella",
+        "Caio Campos Justino",
+        "Guilherme Pereira De Morais",
+        "Gustavo Henrique Costa Pinto",
+        "Keyde Taisa Da Silva",
+        "Luis Felipe Morais",
+        "Victor Acacio Camargo Pacheco"
+      ]
+    }
+  ]
+}
