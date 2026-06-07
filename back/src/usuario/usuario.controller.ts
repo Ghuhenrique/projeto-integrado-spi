@@ -11,7 +11,7 @@ export class UsuarioController {
   create(@Body() createUsuarioDto: CreateUsuarioDto) {
     return this.usuarioService.create(createUsuarioDto);
   }
-
+  
   @Get()
   async findAll() {
     return await this.usuarioService.findAll();
