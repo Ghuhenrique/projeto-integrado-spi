@@ -1,0 +1,41 @@
+<!-- ══ MODAL: CADASTRO DE USUÁRIO ══ -->
+<div class="overlay-modal" id="overlay-modal-cadastro">
+  <div class="modal">
+    <h3>Criar Conta</h3>
+    <p class="subtitulo-modal">Preencha os dados para se cadastrar no sistema</p>
+
+    <div id="erro-modal-cadastro" class="caixa-erro"></div>
+
+    <div class="campo">
+      <label>Nome completo</label>
+      <input type="text" id="input-nome-completo" placeholder="Seu nome completo">
+    </div>
+    <div class="campo">
+      <label>Login</label>
+      <input type="text" id="input-login-novo" placeholder="Defina um login">
+    </div>
+    <div class="campo">
+      <label>Senha</label>
+      <input type="password" id="input-senha-nova" placeholder="Crie uma senha">
+    </div>
+    <div class="campo">
+      <label>Confirmar Senha</label>
+      <input type="password" id="input-confirmacao-senha" placeholder="Repita a senha">
+    </div>
+    <div class="campo">
+      <label>Perfil</label>
+      <div class="container-select">
+        <select id="select-perfil-cadastro">
+          <option value="">Selecione um perfil...</option>
+          <option value="professor">👨‍🏫 Professor</option>
+          <!--<option value="aluno">👨‍🎓 Aluno</option>-->
+        </select>
+      </div>
+    </div>
+
+    <div class="botoes-modal">
+      <button class="btn-secundario" onclick="fecharModalCadastro()">Cancelar</button>
+      <button class="btn-primario" id="btn-cadastrar-usuario" onclick="cadastrarNovoUsuario()">Cadastrar</button>
+    </div>
+  </div>
+</div>
