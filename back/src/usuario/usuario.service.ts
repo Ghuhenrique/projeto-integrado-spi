@@ -13,13 +13,14 @@ export class UsuarioService {
   async findAll() {
     const session =this.neo4jService.getSession();
     try {
-      const result = await session.run('MATCH (n:Aluno) RETURN n.curso as curso, n.matr as matr, n.nome as nome LIMIT 25');
+      const result = await session.run('MATCH (n:Aluno) RETURN elementId(n) AS id, n.nome AS nome LIMIT 25');
       const alunos = result.records.map( r => {
         console.log(r);
         return {
-          curso:r.get('curso'),
-          matr:r.get('matr'),
-          nome:r.get('nome')
+          // curso:r.get('curso'),
+          // matr:r.get('matr'),
+          nome:r.get('nome'),
+          id:r.get('id')
         }
       });
       return alunos;
@@ -31,8 +32,27 @@ export class UsuarioService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} usuario`;
+  async findOne(id: string) {
+    const session =this.neo4jService.getSession();
+
+    try {
+      const result = await session.run(
+        'MATCH (n:Aluno) WHERE elementId(n) = $id RETURN n.nome as nome LIMIT 25',
+        { id });
+      if(result.records.length == 0){
+        return null
+      }
+  
+      return {
+        nome: result.records[0].get('nome')
+      }
+      
+    } catch (error) {
+      console.error('Erro Neo4J: ', error);
+      throw error;
+    }finally{
+      await session.close();
+    }
   }
 
   update(id: number, updateUsuarioDto: UpdateUsuarioDto) {

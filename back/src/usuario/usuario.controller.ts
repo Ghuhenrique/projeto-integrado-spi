@@ -18,8 +18,8 @@ export class UsuarioController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usuarioService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.usuarioService.findOne(id);
   }
 
   @Patch(':id')
