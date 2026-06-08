@@ -3,7 +3,7 @@
 
 [x] Ter no mínimo 3 recursos (ex: usuários, posts, comentários)
 [] Implementar CRUD completo para pelo menos 2 dos recursos
-[] Ter pelo menos um relacionamento 1:N entre dois recursos
+[x] Ter pelo menos um relacionamento 1:N entre dois recursos
 [x] Conexão com banco para persistência de dados
 [x] Criar middlewares de validação para as rotas POST e PUT
 [x] Implementar middleware de log registrando método, URL, status e tempo
@@ -14,13 +14,13 @@
 
 # Requisitos do Front-End
 
-[] Desenvolvido em HTML, CSS ou JavaScript
-[] Consumir a API
-[] Ter tela de cadastro e login de usuário
-[] Exibir, criar, editar e remover os recursos principais da aplicação
-[] Armazenar o token JWT após o login e enviá-lo nas requisições autenticadas
-[] Tratar e exibir mensagens de erro retornadas pela API
-[] Redirecionar para a tela de login quando o token expirar ou for inválido
+[x] Desenvolvido em HTML, CSS ou JavaScript
+[x] Consumir a API
+[x] Ter tela de cadastro e login de usuário
+[x] Exibir, criar, editar e remover os recursos principais da aplicação
+[x] Armazenar o token JWT após o login e enviá-lo nas requisições autenticadas
+[x] Tratar e exibir mensagens de erro retornadas pela API
+[x] Redirecionar para a tela de login quando o token expirar ou for inválido
 
 # Relatório
 [] relatório deve ser entregue em PDF e conter:
