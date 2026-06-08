@@ -1,6 +1,6 @@
 import {
-  Module,
   MiddlewareConsumer,
+  Module,
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
@@ -10,8 +10,8 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-import { UsuarioModule } from './usuario/usuario.module';
 import { Neo4jModule } from './neo4j/neo4j.module';
+import { ProfessorModule } from './professor/professor.module';
 
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 
@@ -21,7 +21,7 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
       isGlobal: true,
     }),
 
-    UsuarioModule,
+    ProfessorModule,
     Neo4jModule,
   ],
   controllers: [AppController],

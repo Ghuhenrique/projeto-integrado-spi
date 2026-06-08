@@ -1,19 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUsuarioDto } from './dto/create-usuario.dto';
-import { UpdateUsuarioDto } from './dto/update-usuario.dto';
+import { CreateProfessorDto } from './dto/create-professor.dto';
+import { UpdateProfessorDto } from './dto/update-professor.dto';
 import { Neo4jService } from 'src/neo4j/neo4j.service';
 
 @Injectable()
-export class UsuarioService {
+export class ProfessorService {
   constructor(private readonly neo4jService: Neo4jService){}
-  create(createUsuarioDto: CreateUsuarioDto) {
+  create(createUsuarioDto: CreateProfessorDto) {
+
+    const insertQuery = `
+        CREATE (u:User {
+          id: randomUUID(),
+          name: $name,
+          email: $email,
+          age: $age,
+          city: $city,
+          createdAt: datetime()
+        })
+        RETURN u
+      `
+      const session = this.neo4jService.getWriteSession();
+      try {
+        session.run(insertQuery, {
+          
+        })
+      } catch (error) {
+        
+      }
+
     return 'This action adds a new usuario';
   }
 
   async findAll() {
-    const session =this.neo4jService.getSession();
+    const session =this.neo4jService.getReadSession();
     try {
-      const result = await session.run('MATCH (n:Aluno) RETURN elementId(n) AS id, n.nome AS nome LIMIT 25');
+      const result = await session.run('MATCH (n:Professor) RETURN elementId(n) AS id, n.nome AS nome LIMIT 25');
       const alunos = result.records.map( r => {
         console.log(r);
         return {
@@ -33,11 +54,11 @@ export class UsuarioService {
   }
 
   async findOne(id: string) {
-    const session =this.neo4jService.getSession();
+    const session = this.neo4jService.getReadSession();
 
     try {
       const result = await session.run(
-        'MATCH (n:Aluno) WHERE elementId(n) = $id RETURN n.nome as nome LIMIT 25',
+        'MATCH (n:Professor) WHERE elementId(n) = $id RETURN n.nome as nome LIMIT 25',
         { id });
       if(result.records.length == 0){
         return null
@@ -55,7 +76,7 @@ export class UsuarioService {
     }
   }
 
-  update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
+  update(id: number, updateUsuarioDto: UpdateProfessorDto) {
     return `This action updates a #${id} usuario`;
   }
 
