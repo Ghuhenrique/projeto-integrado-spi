@@ -103,7 +103,7 @@ const ApiAuth = {
 const ApiProjetos = {
     /** GET /projetos — lista todos (professor vê todos; aluno vê os seus) */
     listar() {
-        return _requisicao('/projetos', 'GET', null, true);
+        return _requisicao('/projeto', 'GET', null, true);
     },
 
     /**
@@ -111,7 +111,7 @@ const ApiProjetos = {
      * @param {string} id
      */
     buscarPorId(id) {
-        return _requisicao(`/projetos/${id}`, 'GET', null, true);
+        return _requisicao(`/projeto/${id}`, 'GET', null, true);
     },
 
     /**
@@ -121,7 +121,7 @@ const ApiProjetos = {
      *            situacao:string, alunos:string[] }} projeto
      */
     criar(projeto) {
-        return _requisicao('/projetos', 'POST', projeto, true);
+        return _requisicao('/projeto', 'POST', projeto, true);
     },
 
     /**
@@ -130,7 +130,7 @@ const ApiProjetos = {
      * @param {Partial<Projeto>} dadosAtualizados
      */
     atualizar(id, dadosAtualizados) {
-        return _requisicao(`/projetos/${id}`, 'PATCH', dadosAtualizados, true);
+        return _requisicao(`/projeto/${id}`, 'PATCH', dadosAtualizados, true);
     },
 
     /**
@@ -138,7 +138,7 @@ const ApiProjetos = {
      * @param {string} id
      */
     remover(id) {
-        return _requisicao(`/projetos/${id}`, 'DELETE', null, true);
+        return _requisicao(`/projeto/${id}`, 'DELETE', null, true);
     },
 };
 
