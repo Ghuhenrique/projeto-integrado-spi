@@ -132,8 +132,6 @@ export class ProfessorService {
     if(!user) return null;
 
     const senha = await bcrypt.hash(password, 10);
-    console.log('senha ', senha)
-    console.log('user.password ', user.senha)
     
     if (user && await bcrypt.compare(password, user.senha)) {
       const { password, ...result } = user;
