@@ -17,6 +17,7 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt.auth.guard';
+import { ProjetoModule } from './projeto/projeto.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { JwtAuthGuard } from './auth/jwt.auth.guard';
 
     ProfessorModule,
     Neo4jModule,
-    AuthModule
+    AuthModule,
+    ProjetoModule
   ],
   controllers: [AppController],
   providers: [AppService, {
