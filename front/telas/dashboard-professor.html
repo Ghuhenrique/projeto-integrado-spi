@@ -1,0 +1,33 @@
+<!-- ══ TELA: DASHBOARD PROFESSOR ══ -->
+<div id="tela-dashboard-professor" class="tela">
+  <div class="barra-topo">
+    <img src="imagens/marca_UEG_horizontal_extenso_branco.png" alt="UEG">
+    <div class="barra-topo-direita">
+      <div class="pílula-usuario" onclick="abrirModalPerfil()">
+        <div class="avatar-usuario prof" id="avatar-professor">P</div>
+        <span class="nome-usuario" id="nome-usuario-professor">Professor</span>
+        <span class="badge-perfil prof">Professor</span>
+      </div>
+      <button class="btn-sair" onclick="realizarLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="corpo-dashboard">
+    <div class="boas-vindas">
+      <h2>Bem-vindo(a), <span id="primeiro-nome-professor">Professor</span></h2>
+      <p>Selecione uma das opções abaixo para continuar</p>
+    </div>
+    <div class="grade-cartoes-dashboard">
+      <div class="cartao-dashboard cartao-cadastro" onclick="irPara('tela-cadastro-projeto')">
+        <div class="icone-cartao">📋</div>
+        <h3>Cadastrar Projeto</h3>
+        <p>Registre um novo projeto informando nome, coordenador e alunos participantes.</p>
+      </div>
+      <div class="cartao-dashboard cartao-consulta" onclick="irPara('tela-pesquisa-professor')">
+        <div class="icone-cartao">🔍</div>
+        <h3>Consultar Projetos</h3>
+        <p>Acesse e visualize todos os projetos registrados no sistema da UEG.</p>
+      </div>
+    </div>
+  </div>
+</div>

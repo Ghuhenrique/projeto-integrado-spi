@@ -1,0 +1,54 @@
+<!-- ══ TELA: LOGIN ══ -->
+<div id="tela-login" class="tela ativa">
+  <div class="painel-esquerdo">
+    <div class="logo-login">
+      <img src="imagens/marca_UEG_horizontal_extenso_branco.png" alt="UEG">
+    </div>
+    <div class="hero-login">
+      <h1>Sistema de <strong>Gestão de Projetos</strong></h1>
+      <div class="divisor-login"></div>
+      <p>Plataforma institucional para cadastro e consulta de projetos acadêmicos da Universidade Estadual de Goiás.</p>
+    </div>
+    <div class="rodape-login">Universidade Estadual de Goiás — UEG<br>Todos os direitos reservados</div>
+  </div>
+
+  <div class="painel-direito">
+    <div class="caixa-login">
+      <h2>Acesso ao Sistema</h2>
+      <p class="subtitulo-login">Informe seus dados e selecione seu perfil de acesso</p>
+
+      <div id="erro-login" class="caixa-erro"></div>
+
+      <div class="campo">
+        <label>Login</label>
+        <input type="text" id="input-login" placeholder="E-mail" autocomplete="username">
+      </div>
+      <div class="campo">
+        <label>Senha</label>
+        <input type="password" id="input-senha" placeholder="Senha" autocomplete="current-password">
+      </div>
+
+      <div class="campo">
+        <label>Tipo de perfil</label>
+        <div class="cartoes-perfil">
+          <div class="cartao-perfil" id="cartao-professor" onclick="selecionarPerfil('professor')">
+            <div class="icone-perfil">👨‍🏫</div>
+            <div class="titulo-perfil">Professor</div>
+            <div class="descricao-perfil">Cadastra e gerencia projetos</div>
+          </div>
+          <!--
+          <div class="cartao-perfil" id="cartao-aluno" onclick="selecionarPerfil('aluno')">
+            <div class="icone-perfil">👨‍🎓</div>
+            <div class="titulo-perfil">Aluno</div>
+            <div class="descricao-perfil">Acessa seus projetos</div>
+          </div>
+          -->
+        </div>
+      </div>
+
+      <button class="btn-primario" id="btn-login" onclick="realizarLogin()">Acessar o sistema</button>
+      <div class="separador-ou">ou</div>
+      <button class="btn-secundario" onclick="abrirModalCadastro()">Realizar cadastro</button>
+    </div>
+  </div>
+</div>
