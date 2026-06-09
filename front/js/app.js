@@ -110,13 +110,195 @@ async function realizarLogin() {
 
     elementoErro.classList.remove('visivel');
 
-    const { access_token, usuario } = resultado.data;
+    const { access_token, user } = resultado.data;
+    const usuario = {
+        id: user.id,
+        nomeCompleto: user.name,
+        email: user.email,
+        perfil: user.perfil ?? perfilSelecionado,
+    };
     Auth.iniciarSessao(access_token, usuario);
 
     await _navegarParaDashboard();
 }
 
 // ── LOGOUT ────────────────────────────────────────────────────────────────────
+// ── MODAL DE PERFIL DO USUÁRIO ────────────────────────────────────────────────
+
+async function abrirModalPerfil() {
+    await carregarTela('modal-perfil-usuario');
+
+    const usuario = Auth.usuarioAtual;
+    if (!usuario) return;
+
+    const perfil = usuario.perfil ?? 'professor';
+    const iniciais = gerarIniciais(usuario.nomeCompleto, true) || '?';
+    const isProfessor = perfil === 'professor';
+
+    // Avatar
+    const avatarEl = document.getElementById('modal-perfil-avatar');
+    avatarEl.textContent = iniciais;
+    avatarEl.className = `modal-perfil-avatar ${isProfessor ? 'prof' : 'aluno'}`;
+
+    // Badge de perfil
+    const badgeEl = document.getElementById('modal-perfil-badge');
+    badgeEl.textContent = isProfessor ? 'Professor' : 'Aluno';
+    badgeEl.className = `badge-perfil ${isProfessor ? 'prof' : 'aluno'}`;
+
+    // Dados
+    document.getElementById('modal-perfil-nome').textContent = usuario.nomeCompleto || '—';
+    document.getElementById('modal-perfil-email').textContent = usuario.email || '—';
+
+    _mostrarSecaoPerfil('visualizacao');
+    document.getElementById('overlay-modal-perfil').classList.add('aberto');
+}
+
+function fecharModalPerfil() {
+    document.getElementById('overlay-modal-perfil').classList.remove('aberto');
+}
+
+function _mostrarSecaoPerfil(secao) {
+    // secao: 'visualizacao' | 'edicao' | 'senha' | 'exclusao'
+    ['visualizacao', 'edicao', 'senha', 'exclusao'].forEach(s => {
+        document.getElementById(`modal-perfil-${s}`).style.display = s === secao ? '' : 'none';
+    });
+    // Limpa erros ao trocar de seção
+    ['vis', 'edit', 'senha', 'excl'].forEach(id => {
+        const el = document.getElementById(`modal-perfil-erro-${id}`);
+        if (el) el.classList.remove('visivel');
+    });
+}
+
+function voltarVisualizacaoPerfil() {
+    _mostrarSecaoPerfil('visualizacao');
+}
+
+// ── EDITAR PERFIL ─────────────────────────────────────────────────────────────
+function abrirEdicaoPerfil() {
+    const usuario = Auth.usuarioAtual;
+    document.getElementById('edit-perfil-nome').value = usuario.nomeCompleto || '';
+    document.getElementById('edit-perfil-email').value = usuario.email || '';
+    _mostrarSecaoPerfil('edicao');
+    document.getElementById('edit-perfil-nome').focus();
+}
+
+async function salvarEdicaoPerfil() {
+    const nome = document.getElementById('edit-perfil-nome').value.trim();
+    const email = document.getElementById('edit-perfil-email').value.trim();
+    const erroEl = document.getElementById('modal-perfil-erro-edit');
+
+    if (!nome || !email) {
+        erroEl.textContent = 'Preencha nome e e-mail.';
+        erroEl.classList.add('visivel'); return;
+    }
+
+    _definirCarregando('btn-salvar-perfil', true, 'Salvando...');
+
+    // ── Chamada real ao back-end ──────────────────────────────────────────────
+    // TODO: PATCH /usuario/:id com { nome, email }
+    const resultado = await ApiUsuarios.atualizar(Auth.usuarioAtual.id, { nome, email });
+    // ─────────────────────────────────────────────────────────────────────────
+
+    _definirCarregando('btn-salvar-perfil', false, 'Salvar');
+
+    if (!resultado.ok) {
+        erroEl.textContent = resultado.erro;
+        erroEl.classList.add('visivel'); return;
+    }
+
+    // Atualiza a sessão local
+    Auth.usuarioAtual.nomeCompleto = nome;
+    Auth.usuarioAtual.email = email;
+    sessionStorage.setItem('spi_usuario', JSON.stringify(Auth.usuarioAtual));
+
+    // Atualiza os nomes exibidos na barra de topo
+    if (Auth.obterPerfil() === 'professor') _preencherBarraProfessor(nome);
+    else _preencherBarraAluno(nome);
+
+    // Volta para visualização com dados atualizados
+    document.getElementById('modal-perfil-nome').textContent = nome;
+    document.getElementById('modal-perfil-email').textContent = email;
+    const iniciais = gerarIniciais(nome, true);
+    document.getElementById('modal-perfil-avatar').textContent = iniciais;
+
+    _mostrarSecaoPerfil('visualizacao');
+    _exibirToast('Perfil atualizado com sucesso!');
+}
+
+// ── ALTERAR SENHA ─────────────────────────────────────────────────────────────
+function abrirAlteracaoSenha() {
+    ['edit-senha-atual', 'edit-senha-nova', 'edit-senha-confirm'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
+    _mostrarSecaoPerfil('senha');
+    document.getElementById('edit-senha-atual').focus();
+}
+
+async function salvarAlteracaoSenha() {
+    const senhaAtual = document.getElementById('edit-senha-atual').value;
+    const senhaNova = document.getElementById('edit-senha-nova').value;
+    const senhaConfirm = document.getElementById('edit-senha-confirm').value;
+    const erroEl = document.getElementById('modal-perfil-erro-senha');
+
+    if (!senhaAtual || !senhaNova || !senhaConfirm) {
+        erroEl.textContent = 'Preencha todos os campos.';
+        erroEl.classList.add('visivel'); return;
+    }
+    if (senhaNova.length < 6) {
+        erroEl.textContent = 'A nova senha deve ter no mínimo 6 caracteres.';
+        erroEl.classList.add('visivel'); return;
+    }
+    if (senhaNova !== senhaConfirm) {
+        erroEl.textContent = 'A confirmação não coincide com a nova senha.';
+        erroEl.classList.add('visivel'); return;
+    }
+
+    _definirCarregando('btn-salvar-senha', true, 'Salvando...');
+
+    // ── Chamada real ao back-end ──────────────────────────────────────────────
+    // TODO: PATCH /usuario/:id/senha com { senhaAtual, senhaNova }
+    const resultado = await ApiUsuarios.atualizar(Auth.usuarioAtual.id, { senhaAtual, senhaNova });
+    // ─────────────────────────────────────────────────────────────────────────
+
+    _definirCarregando('btn-salvar-senha', false, 'Salvar');
+
+    if (!resultado.ok) {
+        erroEl.textContent = resultado.erro;
+        erroEl.classList.add('visivel'); return;
+    }
+
+    _mostrarSecaoPerfil('visualizacao');
+    _exibirToast('Senha alterada com sucesso!');
+}
+
+// ── EXCLUIR CONTA ─────────────────────────────────────────────────────────────
+function confirmarExclusaoPerfil() {
+    _mostrarSecaoPerfil('exclusao');
+}
+
+async function excluirContaConfirmado() {
+    const erroEl = document.getElementById('modal-perfil-erro-excl');
+    _definirCarregando('btn-confirmar-exclusao', true, 'Excluindo...');
+
+    // ── Chamada real ao back-end ──────────────────────────────────────────────
+    // TODO: DELETE /usuario/:id
+    const resultado = await ApiUsuarios.remover(Auth.usuarioAtual.id);
+    // ─────────────────────────────────────────────────────────────────────────
+
+    _definirCarregando('btn-confirmar-exclusao', false, 'Sim, excluir minha conta');
+
+    if (!resultado.ok) {
+        erroEl.textContent = resultado.erro;
+        erroEl.classList.add('visivel'); return;
+    }
+
+    fecharModalPerfil();
+    Auth.limparSessao();
+    listaProjetos = [];
+    _exibirToast('Conta excluída. Até logo!');
+    setTimeout(() => irPara('tela-login'), 1500);
+}
+
 function realizarLogout() {
     Auth.limparSessao();
     listaProjetos = [];

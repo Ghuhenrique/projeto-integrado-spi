@@ -33,6 +33,7 @@ const mapaArquivosDeTelas = {
     'tela-dashboard-professor':   'dashboard-professor.html',
     'tela-dashboard-aluno':       'dashboard-aluno.html',
     'tela-cadastro-projeto':      'cadastro-projeto.html',
+    'tela-perfil-usuario':        'modal-perfil-usuario.html',
     'tela-pesquisa-professor':    'pesquisa-professor.html',
     'tela-detalhe-aluno':         'detalhe-aluno.html',
     'modal-cadastro-usuario':     'modal-cadastro-usuario.html',
