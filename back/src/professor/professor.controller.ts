@@ -2,14 +2,16 @@ import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/commo
 import { CreateProfessorDto } from './dto/create-professor.dto';
 import { UpdateProfessorDto } from './dto/update-professor.dto';
 import { ProfessorService } from './professor.service';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('professor')
 export class ProfessorController {
   constructor(private readonly professorService: ProfessorService) {}
 
   @Post()
-  create(@Body() createUsuarioDto: CreateProfessorDto) {
-    return this.professorService.create(createUsuarioDto);
+  async create(@Body() createUsuarioDto: CreateProfessorDto) {
+    await this.professorService.create(createUsuarioDto);
   }
   
   @Get()
@@ -24,11 +26,11 @@ export class ProfessorController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUsuarioDto: UpdateProfessorDto) {
-    return this.professorService.update(+id, updateUsuarioDto);
+    return this.professorService.update(id, updateUsuarioDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.professorService.remove(+id);
+    return this.professorService.remove(id);
   }
 }

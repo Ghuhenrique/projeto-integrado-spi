@@ -10,6 +10,13 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('SPI - Backend')
     .setVersion('1.0.0.alpha')
+    .addBearerAuth({
+      type:'http',
+      scheme:'bearer',
+      bearerFormat: 'JWT',
+      description: 'Informe o token JWT',
+      in:'header'
+    })
     .build();
 
   const docFactory = () => SwaggerModule.createDocument(app, config);

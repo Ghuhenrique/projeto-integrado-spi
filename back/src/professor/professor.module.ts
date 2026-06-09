@@ -8,6 +8,7 @@ import { ProfessorService } from './professor.service';
   providers: [ProfessorService],
   imports:[
     Neo4jModule
-  ]
+  ],
+  exports: [ProfessorService]
 })
 export class ProfessorModule {}
