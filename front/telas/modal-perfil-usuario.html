@@ -1,0 +1,126 @@
+<!-- ══ MODAL: PERFIL DO USUÁRIO ══ -->
+<div id="overlay-modal-perfil" class="overlay-modal" onclick="if(event.target===this) fecharModalPerfil()">
+
+    <div class="modal modal-perfil">
+
+        <!-- Cabeçalho -->
+        <div class="modal-perfil-header">
+            <div class="modal-perfil-avatar-wrap">
+                <div class="modal-perfil-avatar" id="modal-perfil-avatar">?</div>
+                <span class="badge-perfil" id="modal-perfil-badge">—</span>
+            </div>
+            <button class="btn-fechar-modal-perfil" onclick="fecharModalPerfil()" aria-label="Fechar">✕</button>
+        </div>
+
+        <!-- Dados do usuário (modo visualização) -->
+        <div id="modal-perfil-visualizacao">
+            <h3 class="modal-perfil-titulo">Meu Perfil</h3>
+
+            <div class="modal-perfil-campo">
+                <span class="modal-perfil-rotulo">Nome completo</span>
+                <span class="modal-perfil-valor" id="modal-perfil-nome">—</span>
+            </div>
+
+            <div class="modal-perfil-campo">
+                <span class="modal-perfil-rotulo">E-mail / login</span>
+                <span class="modal-perfil-valor" id="modal-perfil-email">—</span>
+            </div>
+
+            <!-- Ações -->
+            <div class="modal-perfil-acoes">
+                <button class="modal-perfil-acao" onclick="abrirEdicaoPerfil()">
+                    <span class="modal-perfil-acao-icone">✏️</span>
+                    <div>
+                        <div class="modal-perfil-acao-titulo">Editar perfil</div>
+                        <div class="modal-perfil-acao-desc">Alterar nome e e-mail</div>
+                    </div>
+                </button>
+
+                <button class="modal-perfil-acao" onclick="abrirAlteracaoSenha()">
+                    <span class="modal-perfil-acao-icone">🔑</span>
+                    <div>
+                        <div class="modal-perfil-acao-titulo">Alterar senha</div>
+                        <div class="modal-perfil-acao-desc">Definir uma nova senha de acesso</div>
+                    </div>
+                </button>
+
+                <button class="modal-perfil-acao acao-perigo" onclick="confirmarExclusaoPerfil()">
+                    <span class="modal-perfil-acao-icone">🗑️</span>
+                    <div>
+                        <div class="modal-perfil-acao-titulo">Excluir conta</div>
+                        <div class="modal-perfil-acao-desc">Remove permanentemente seu acesso</div>
+                    </div>
+                </button>
+            </div>
+
+            <div id="modal-perfil-erro-vis" class="caixa-erro"></div>
+        </div>
+
+        <!-- Modo: editar perfil -->
+        <div id="modal-perfil-edicao" style="display:none">
+            <h3 class="modal-perfil-titulo">Editar Perfil</h3>
+
+            <div class="campo-form">
+                <label for="edit-perfil-nome">Nome completo</label>
+                <input type="text" id="edit-perfil-nome" placeholder="Seu nome completo">
+            </div>
+
+            <div class="campo-form" style="margin-top:.75rem">
+                <label for="edit-perfil-email">E-mail</label>
+                <input type="email" id="edit-perfil-email" placeholder="seu@email.com">
+            </div>
+
+            <div id="modal-perfil-erro-edit" class="caixa-erro" style="margin-top:.75rem"></div>
+
+            <div class="modal-perfil-rodape">
+                <button class="btn-secundario" onclick="voltarVisualizacaoPerfil()">Cancelar</button>
+                <button class="btn-primario" id="btn-salvar-perfil" onclick="salvarEdicaoPerfil()">Salvar</button>
+            </div>
+        </div>
+
+        <!-- Modo: alterar senha -->
+        <div id="modal-perfil-senha" style="display:none">
+            <h3 class="modal-perfil-titulo">Alterar Senha</h3>
+
+            <div class="campo-form">
+                <label for="edit-senha-atual">Senha atual</label>
+                <input type="password" id="edit-senha-atual" placeholder="••••••••">
+            </div>
+
+            <div class="campo-form" style="margin-top:.75rem">
+                <label for="edit-senha-nova">Nova senha</label>
+                <input type="password" id="edit-senha-nova" placeholder="••••••••">
+            </div>
+
+            <div class="campo-form" style="margin-top:.75rem">
+                <label for="edit-senha-confirm">Confirmar nova senha</label>
+                <input type="password" id="edit-senha-confirm" placeholder="••••••••">
+            </div>
+
+            <div id="modal-perfil-erro-senha" class="caixa-erro" style="margin-top:.75rem"></div>
+
+            <div class="modal-perfil-rodape">
+                <button class="btn-secundario" onclick="voltarVisualizacaoPerfil()">Cancelar</button>
+                <button class="btn-primario" id="btn-salvar-senha" onclick="salvarAlteracaoSenha()">Salvar</button>
+            </div>
+        </div>
+
+        <!-- Modo: confirmar exclusão -->
+        <div id="modal-perfil-exclusao" style="display:none">
+            <h3 class="modal-perfil-titulo modal-perfil-titulo-perigo">Excluir conta</h3>
+            <p class="modal-perfil-aviso-exclusao">
+                Tem certeza? Esta ação é <strong>irreversível</strong>. Sua conta e todos os
+                seus dados serão removidos permanentemente.
+            </p>
+
+            <div id="modal-perfil-erro-excl" class="caixa-erro"></div>
+
+            <div class="modal-perfil-rodape">
+                <button class="btn-secundario" onclick="voltarVisualizacaoPerfil()">Cancelar</button>
+                <button class="btn-perigo" id="btn-confirmar-exclusao" onclick="excluirContaConfirmado()">Sim, excluir
+                    minha conta</button>
+            </div>
+        </div>
+
+    </div>
+</div>

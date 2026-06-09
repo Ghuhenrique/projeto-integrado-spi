@@ -85,17 +85,17 @@ const ApiAuth = {
      * @param {{ login:string, senha:string }} credenciais
      * @returns {Promise<{ok:boolean, data?:{access_token:string, usuario:{nomeCompleto:string, perfil:string}}, erro?:string}>}
      */
-    login(credenciais) {
-        return _requisicao('/auth/login', 'POST', credenciais, false);
+    login({ login, senha }) {
+        return _requisicao('/auth/login', 'POST', { email: login, password: senha }, false);
     },
 
     /**
      * POST /auth/cadastro
      * @param {{ nomeCompleto:string, login:string, senha:string, perfil:string }} dados
      */
-    cadastrar(dados) {
-        return _requisicao('/auth/cadastro', 'POST', dados, false);
-    },
+    cadastrar({ nomeCompleto, login, senha }) {
+        return _requisicao('/professor', 'POST', { nome: nomeCompleto, email: login, senha }, false);
+    }
 };
 
 // ── PROJETOS ──────────────────────────────────────────────────────────────────

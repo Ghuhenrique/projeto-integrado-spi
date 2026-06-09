@@ -65,6 +65,18 @@ async function criarConstraints(session) {
         FOR (a:Aluno)
         REQUIRE a.nome IS UNIQUE
     `);
+
+    await session.run(`
+        CREATE CONSTRAINT professor_email_obrigatorio IF NOT EXISTS
+        FOR (p:Professor)
+        REQUIRE p.email IS NOT NULL
+    `);
+
+    await session.run(`
+        CREATE CONSTRAINT professor_senha_obrigatoria IF NOT EXISTS
+        FOR (p:Professor)
+        REQUIRE p.senha IS NOT NULL
+    `);
 }
 
 async function bancoJaPopulado(session) {
@@ -83,6 +95,7 @@ async function bancoJaPopulado(session) {
 
 async function importarProjeto(session, projeto) {
 
+    // Cria ou atualiza o projeto
     await session.run(
         `
         MERGE (p:Projeto {
@@ -96,6 +109,7 @@ async function importarProjeto(session, projeto) {
         }
     );
 
+    // Cria ou atualiza o professor coordenador
     await session.run(
         `
         MATCH (p:Projeto {
@@ -106,14 +120,20 @@ async function importarProjeto(session, projeto) {
             nome: $coordenador
         })
 
+        SET prof.email = $email,
+            prof.senha = $senha
+
         MERGE (prof)-[:COORDENA]->(p)
         `,
         {
             nome: projeto.nome,
-            coordenador: projeto.coordenador
+            coordenador: projeto.coordenador,
+            email: projeto.emailCoordenador,
+            senha: projeto.senhaCoordenador
         }
     );
 
+    // Cria os alunos e os vincula ao projeto
     for (const aluno of projeto.alunos) {
 
         await session.run(
@@ -138,15 +158,15 @@ async function importarProjeto(session, projeto) {
 
 async function bootstrap() {
 
+    let session;
+
     try {
 
         await aguardarNeo4j();
 
-        const session = driver.session({
+        session = driver.session({
             database: CONFIG.database
         });
-
-        await criarConstraints(session);
 
         const arquivo = await fs.readFile(
             CONFIG.arquivo,
@@ -188,6 +208,10 @@ async function bootstrap() {
             }
         }
 
+        // Cria as constraints após a importação,
+        // garantindo que todos os professores tenham email e senha
+        await criarConstraints(session);
+
         const resultado = await session.run(`
             MATCH (p:Projeto)
             RETURN count(p) AS total
@@ -201,8 +225,6 @@ async function bootstrap() {
             `Total de projetos cadastrados: ${total}`
         );
 
-        await session.close();
-
     } catch (erro) {
 
         console.error(
@@ -212,6 +234,10 @@ async function bootstrap() {
         console.error(erro);
 
     } finally {
+
+        if (session) {
+            await session.close();
+        }
 
         await driver.close();
     }
