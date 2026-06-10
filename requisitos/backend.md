@@ -8,9 +8,9 @@
 [x] Criar middlewares de validação para as rotas POST e PUT
 [x] Implementar middleware de log registrando método, URL, status e tempo
 [x] Usar variáveis de ambiente com .env para configurações sensíveis 
-[] Implementar autenticação com JWT – rotas de cadastro e login
-[] Proteger com middleware de autenticação as rotas que exigem login
-[] Armazenar senhas com hash bcrypt
+[x] Implementar autenticação com JWT – rotas de cadastro e login
+[x] Proteger com middleware de autenticação as rotas que exigem login
+[X] Armazenar senhas com hash bcrypt
 
 # Requisitos do Front-End
 

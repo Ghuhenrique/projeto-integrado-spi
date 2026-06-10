@@ -19,7 +19,7 @@ export class ProjetoController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.projetoService.findOne(+id);
+    return this.projetoService.findOne(id);
   }
 
   @Patch(':id')
