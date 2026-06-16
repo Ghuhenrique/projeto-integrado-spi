@@ -52,14 +52,15 @@ export class ProjetoService {
     const session = this.neo4jService.getReadSession();
     try {
       const result = await session.run(`
-      MATCH (p:Projeto)
+      MATCH (prof:Professor)-[:COORDENA]->(p:Projeto)
+      OPTIONAL MATCH (a:Aluno)-[:PARTICIPA_DE]->(p)
       RETURN
         p.id AS id,
         p.tipo AS tipo,
         p.nome AS nome,
-        p.coordenador AS coordenador,
-        p.alunos AS alunos,
-        p.emailCoordenador AS emailCoordenador
+        prof.nome AS coordenador,
+        collect(DISTINCT a.nome) AS alunos,
+        prof.email AS emailCoordenador
       `);
       if (result.records.length === 0) {
         return { message: 'Projeto não encontrado' };
