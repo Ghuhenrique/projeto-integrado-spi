@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class ProfessorService {
   constructor(private readonly neo4jService: Neo4jService) { }
+
   async create(createDto: CreateProfessorDto) {
 
     const insertQuery = `
@@ -77,19 +78,23 @@ export class ProfessorService {
     }
   }
 
-  async update(userId: string, updateData: UpdateProfessorDto) {
+  async update(userId: string, updateDto: UpdateProfessorDto) {
     const session = this.neo4jService.getWriteSession();
     try {
       
       const query = `MATCH (u:Professor {id: $userId})
-        SET u += $updateData,
+        SET u += $updateDto,
             u.updatedAt = datetime()
         RETURN u
       `;
+      if(updateDto.senha){
+        const senha = await bcrypt.hash(updateDto.senha, 10);
+        updateDto.senha = senha;
+      }
       
       const result = await session.run(query, {
         userId,
-        updateData
+        updateDto
       });
       return result.records[0]?.get('u').properties;
     } catch (error) {

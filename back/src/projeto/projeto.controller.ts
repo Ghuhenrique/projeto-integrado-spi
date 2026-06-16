@@ -2,11 +2,15 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ProjetoService } from './projeto.service';
 import { CreateProjetoDto } from './dto/create-projeto.dto';
 import { UpdateProjetoDto } from './dto/update-projeto.dto';
+import { Public } from 'src/auth/public.decorator';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('projeto')
 export class ProjetoController {
   constructor(private readonly projetoService: ProjetoService) {}
 
+  @Public()
   @Post()
   create(@Body() createProjetoDto: CreateProjetoDto) {
     return this.projetoService.create(createProjetoDto);
