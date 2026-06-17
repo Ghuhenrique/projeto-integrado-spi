@@ -3,7 +3,7 @@
 ```cypher
 MATCH (u:Professor)
 WHERE u.email IS NULL
-SET u.email = toLower(split(u.name, ' ')[0]) + '@ueg.br',
+SET u.email = toLower(split(u.nome, ' ')[0]) + '@ueg.br',
 u.senha = '$2b$10$sOYkNys73GcxoCCc9on45.8Kpbqcu2pKJXVRItHLBLXoHPNiOEQH.',
 u.id = randomUUID()
 RETURN u.id, u.nome
