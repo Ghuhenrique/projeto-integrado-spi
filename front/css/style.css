@@ -1245,7 +1245,7 @@ body {
 .badge-tipo-projeto {
     display: inline-block;
     background: rgba(255, 255, 255, .18);
-    color: rgba(255, 255, 255, .85);
+    color: var(--cor-ueg-principal);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 1px;
