@@ -38,23 +38,9 @@
           <select id="select-filtro-campus" onchange="renderizarListaProjetos()">
             <option value="">Todos os campus</option>
             <option>Anápolis</option>
-            <option>Goiânia</option>
+            <option>Ceres</option>
             <option>Goianésia</option>
-            <option>Aparecida De Goiânia — Laranjeiras</option>
-            <option>Inhumas</option>
-            <option>Itapuranga</option>
-            <option>Iporá</option>
-            <option>Jussara</option>
-            <option>Morrinhos</option>
-            <option>Palmeiras de Goiás</option>
-            <option>Pires do Rio</option>
-            <option>Porangatu</option>
-            <option>Quirinópolis</option>
-            <option>São Luís de Montes Belos</option>
-            <option>Uruaçu</option>
-            <option>Formosa</option>
-            <option>Goiás</option>
-            <option>Cora Coralina</option>
+            <option>Goiânia</option>
           </select>
         </div>
 
@@ -62,6 +48,15 @@
         <div class="container-select filtro-select">
           <select id="select-filtro-coordenador" onchange="renderizarListaProjetos()">
             <option value="">Todos os coordenadores</option>
+          </select>
+        </div>
+
+        <!-- Filtro para tipo de projeto -->
+        <div class="container-select filtro-select">
+          <select id="select-filtro-tipo" onchange="renderizarListaProjetos()">
+            <option value="">Todos os tipos</option>
+            <option value="Pesquisa">Pesquisa</option>
+            <option value="Extensao">Extensão</option>
           </select>
         </div>
 

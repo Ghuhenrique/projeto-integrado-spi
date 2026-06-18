@@ -1,22 +1,49 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsString } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateProjetoDto {
-    @ApiProperty()
-    @IsString()
-    nomeProjeto: string ;
-    
-    @ApiProperty()
-    @IsString()
-    nomeCoordenador: string;
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  nome: string;
 
-    @ApiProperty()
-    @IsString()
-    tipo:string;
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  campus: string;
 
+  @ApiProperty({ enum: ['Pesquisa', 'Extensao'] })
+  @IsString()
+  @IsNotEmpty()
+  tipo: string;
 
-    @ApiProperty()
-    @IsArray()
-    alunos: string[];
+  @ApiProperty({ enum: ['ativo', 'finalizado'] })
+  @IsString()
+  @IsNotEmpty()
+  situacao: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  dataInicio?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  dataFim?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  cargaHoraria?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  descricao?: string;
+
+  @ApiPropertyOptional({ type: [String], description: 'Array de IDs dos alunos participantes' })
+  @IsOptional()
+  @IsArray()
+  alunos?: string[];
 }
