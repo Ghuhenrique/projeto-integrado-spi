@@ -1,0 +1,25 @@
+<!-- ══ MODAL: BUSCA DE ALUNO ══ -->
+<div class="overlay-modal" id="overlay-modal-busca-aluno">
+  <div class="modal modal-busca-aluno">
+    <h3>🔍 Adicionar Aluno</h3>
+    <p class="subtitulo-modal">Busque pelo nome ou número de matrícula</p>
+
+    <div class="campo campo-busca-aluno">
+      <input
+        type="text"
+        id="input-busca-aluno"
+        placeholder="Nome ou matrícula..."
+        oninput="buscarAlunoModal(this.value)"
+        autocomplete="off"
+      >
+    </div>
+
+    <div id="resultado-busca-aluno" class="lista-resultado-busca">
+      <div class="busca-placeholder">Digite para pesquisar...</div>
+    </div>
+
+    <div class="botoes-modal">
+      <button class="btn-secundario" onclick="fecharModalBuscaAluno()">Cancelar</button>
+    </div>
+  </div>
+</div>

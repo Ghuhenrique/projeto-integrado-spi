@@ -10,13 +10,20 @@
       <label>Nome completo</label>
       <input type="text" id="input-nome-completo" placeholder="Seu nome completo">
     </div>
+
+    <!-- Campo matrícula — visível apenas para aluno -->
+    <div class="campo" id="campo-matricula" style="display:none">
+      <label>Número de Matrícula</label>
+      <input type="text" id="input-matricula" placeholder="Ex: 202400001">
+    </div>
+
     <div class="campo">
-      <label>Login</label>
-      <input type="text" id="input-login-novo" placeholder="Defina um login">
+      <label>E-mail</label>
+      <input type="text" id="input-login-novo" placeholder="Seu e-mail">
     </div>
     <div class="campo">
       <label>Senha</label>
-      <input type="password" id="input-senha-nova" placeholder="Crie uma senha">
+      <input type="password" id="input-senha-nova" placeholder="Crie uma senha (mín. 6 caracteres)">
     </div>
     <div class="campo">
       <label>Confirmar Senha</label>
@@ -25,10 +32,10 @@
     <div class="campo">
       <label>Perfil</label>
       <div class="container-select">
-        <select id="select-perfil-cadastro">
+        <select id="select-perfil-cadastro" onchange="alternarCampoMatricula(this.value)">
           <option value="">Selecione um perfil...</option>
           <option value="professor">👨‍🏫 Professor</option>
-          <!--<option value="aluno">👨‍🎓 Aluno</option>-->
+          <option value="aluno">👨‍🎓 Aluno</option>
         </select>
       </div>
     </div>

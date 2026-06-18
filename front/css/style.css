@@ -510,6 +510,7 @@ body {
 .btn-secundario {
     width: 100%;
     padding: 12px;
+    margin-top: 20px;
     background: transparent;
     color: var(--cor-ueg-principal);
     border: 1.5px solid var(--cor-borda);
@@ -798,6 +799,22 @@ body {
 }
 
 .cartao-projeto-aluno .linha-coordenador {
+    font-size: 13px;
+    color: var(--cor-texto-medio);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cartao-projeto-aluno .linha-campus {
+    font-size: 13px;
+    color: var(--cor-texto-medio);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cartao-projeto-aluno .quantidade-alunos {
     font-size: 13px;
     color: var(--cor-texto-medio);
     display: flex;
@@ -1221,7 +1238,7 @@ body {
 }
 
 .cabecalho-detalhe {
-    background: var(--cor-ueg-principal);
+    background: var(--cor-branca);
     padding: 28px 32px;
 }
 

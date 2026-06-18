@@ -3,7 +3,7 @@
   <div class="barra-topo">
     <img src="imagens/marca_UEG_horizontal_extenso_branco.png" alt="UEG">
     <div class="barra-topo-direita">
-      <div class="pílula-usuario">
+      <div class="pílula-usuario" onclick="abrirModalPerfil()">
         <div class="avatar-usuario aluno" id="avatar-aluno">A</div>
         <span class="nome-usuario" id="nome-usuario-aluno">Aluno</span>
         <span class="badge-perfil aluno">Aluno</span>
@@ -21,5 +21,8 @@
       </div>
       <div class="lista-projetos-aluno" id="lista-projetos-aluno"></div>
     </div>
+    <button class="btn-secundario" onclick="abrirProjetosAtivos()">
+      Consultar Projetos Ativos
+    </button>
   </div>
 </div>

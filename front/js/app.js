@@ -15,6 +15,13 @@
 // Populados após cada chamada à API. Nunca editados diretamente pelo usuário.
 let listaProjetos = [];
 
+// Alunos selecionados no formulário de cadastro/edição de projeto
+// Cada item: { id, nome, matricula }
+let alunosSelecionados = [];
+
+// Contexto de onde o modal de busca foi aberto: 'cadastro' | 'edicao'
+let _modalBuscaAlunoContexto = 'cadastro';
+
 // Estado dos filtros da tela de pesquisa
 let filtroSituacaoAtivo = 'todos';
 
@@ -22,7 +29,6 @@ let filtroSituacaoAtivo = 'todos';
 let projetoAtualModal = null;   // objeto completo do projeto aberto na modal
 let idProjetoModal = null;   // id retornado pelo back-end
 
-let perfilSelecionado = '';
 let menuDropdownAberto = false;
 
 // ── INICIALIZAÇÃO ────────────────────────────────────────────────────────────
@@ -74,13 +80,6 @@ async function _navegarParaDashboard() {
     }
 }
 
-// ── SELEÇÃO DE PERFIL ─────────────────────────────────────────────────────────
-function selecionarPerfil(perfil) {
-    perfilSelecionado = perfil;
-    document.getElementById('cartao-professor').classList.toggle('selecionado', perfil === 'professor');
-    const cartaoAluno = document.getElementById('cartao-aluno');
-    if (cartaoAluno) cartaoAluno.classList.toggle('selecionado', perfil === 'aluno');
-}
 
 // ── LOGIN ────────────────────────────────────────────────────────────────────
 async function realizarLogin() {
@@ -115,7 +114,7 @@ async function realizarLogin() {
         id: user.id,
         nomeCompleto: user.name,
         email: user.email,
-        perfil: user.perfil ?? perfilSelecionado,
+        perfil: user.perfil,
     };
     Auth.iniciarSessao(access_token, usuario);
 
@@ -126,7 +125,11 @@ async function realizarLogin() {
 // ── MODAL DE PERFIL DO USUÁRIO ────────────────────────────────────────────────
 
 async function abrirModalPerfil() {
+    // Garante que o HTML do modal foi injetado no DOM antes de acessar seus elementos
     await carregarTela('modal-perfil-usuario');
+
+    // Aguarda um tick para o DOM processar o HTML recém-injetado
+    await new Promise(r => setTimeout(r, 0));
 
     const usuario = Auth.usuarioAtual;
     if (!usuario) return;
@@ -135,17 +138,15 @@ async function abrirModalPerfil() {
     const iniciais = gerarIniciais(usuario.nomeCompleto, true) || '?';
     const isProfessor = perfil === 'professor';
 
-    // Avatar
     const avatarEl = document.getElementById('modal-perfil-avatar');
+    if (!avatarEl) { console.error('modal-perfil-avatar não encontrado no DOM'); return; }
     avatarEl.textContent = iniciais;
     avatarEl.className = `modal-perfil-avatar ${isProfessor ? 'prof' : 'aluno'}`;
 
-    // Badge de perfil
     const badgeEl = document.getElementById('modal-perfil-badge');
     badgeEl.textContent = isProfessor ? 'Professor' : 'Aluno';
     badgeEl.className = `badge-perfil ${isProfessor ? 'prof' : 'aluno'}`;
 
-    // Dados
     document.getElementById('modal-perfil-nome').textContent = usuario.nomeCompleto || '—';
     document.getElementById('modal-perfil-email').textContent = usuario.email || '—';
 
@@ -194,10 +195,10 @@ async function salvarEdicaoPerfil() {
 
     _definirCarregando('btn-salvar-perfil', true, 'Salvando...');
 
-    // ── Chamada real ao back-end ──────────────────────────────────────────────
-    // TODO: PATCH /usuario/:id com { nome, email }
-    const resultado = await ApiUsuarios.atualizar(Auth.usuarioAtual.id, { nome, email });
-    // ─────────────────────────────────────────────────────────────────────────
+    const ehAluno = Auth.obterPerfil() === 'aluno';
+    const resultado = ehAluno
+        ? await ApiAlunos.atualizar(Auth.usuarioAtual.id, { nome, email })
+        : await ApiUsuarios.atualizar(Auth.usuarioAtual.id, { nome, email });
 
     _definirCarregando('btn-salvar-perfil', false, 'Salvar');
 
@@ -255,10 +256,10 @@ async function salvarAlteracaoSenha() {
 
     _definirCarregando('btn-salvar-senha', true, 'Salvando...');
 
-    // ── Chamada real ao back-end ──────────────────────────────────────────────
-    // TODO: PATCH /usuario/:id/senha com { senhaAtual, senhaNova }
-    const resultado = await ApiUsuarios.atualizar(Auth.usuarioAtual.id, { senhaAtual, senhaNova });
-    // ─────────────────────────────────────────────────────────────────────────
+    const ehAlunoSenha = Auth.obterPerfil() === 'aluno';
+    const resultado = ehAlunoSenha
+        ? await ApiAlunos.atualizar(Auth.usuarioAtual.id, { senhaAtual, senhaNova })
+        : await ApiUsuarios.atualizar(Auth.usuarioAtual.id, { senhaAtual, senhaNova });
 
     _definirCarregando('btn-salvar-senha', false, 'Salvar');
 
@@ -280,10 +281,10 @@ async function excluirContaConfirmado() {
     const erroEl = document.getElementById('modal-perfil-erro-excl');
     _definirCarregando('btn-confirmar-exclusao', true, 'Excluindo...');
 
-    // ── Chamada real ao back-end ──────────────────────────────────────────────
-    // TODO: DELETE /usuario/:id
-    const resultado = await ApiUsuarios.remover(Auth.usuarioAtual.id);
-    // ─────────────────────────────────────────────────────────────────────────
+    const ehAlunoExcl = Auth.obterPerfil() === 'aluno';
+    const resultado = ehAlunoExcl
+        ? await ApiAlunos.remover(Auth.usuarioAtual.id)
+        : await ApiUsuarios.remover(Auth.usuarioAtual.id);
 
     _definirCarregando('btn-confirmar-exclusao', false, 'Sim, excluir minha conta');
 
@@ -321,10 +322,12 @@ function realizarLogout() {
 async function abrirModalCadastro() {
     await carregarTela('modal-cadastro-usuario');
 
-    ['input-nome-completo', 'input-login-novo', 'input-senha-nova', 'input-confirmacao-senha'].forEach(id => {
-        document.getElementById(id).value = '';
+    ['input-nome-completo', 'input-matricula', 'input-login-novo', 'input-senha-nova', 'input-confirmacao-senha'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
     });
     document.getElementById('select-perfil-cadastro').value = '';
+    document.getElementById('campo-matricula').style.display = 'none';
     document.getElementById('erro-modal-cadastro').classList.remove('visivel');
     document.getElementById('overlay-modal-cadastro').classList.add('aberto');
 
@@ -345,10 +348,14 @@ async function cadastrarNovoUsuario() {
     const senhaNova = document.getElementById('input-senha-nova').value;
     const confirmacaoSenha = document.getElementById('input-confirmacao-senha').value;
     const perfilEscolhido = document.getElementById('select-perfil-cadastro').value;
+    const matricula = document.getElementById('input-matricula')?.value.trim();
     const elementoErro = document.getElementById('erro-modal-cadastro');
 
     if (!nomeCompleto || !loginNovo || !senhaNova || !confirmacaoSenha || !perfilEscolhido) {
         exibirErro(elementoErro, 'Preencha todos os campos!'); return;
+    }
+    if (perfilEscolhido === 'aluno' && !matricula) {
+        exibirErro(elementoErro, 'Informe o número de matrícula!'); return;
     }
     if (senhaNova !== confirmacaoSenha) {
         exibirErro(elementoErro, 'As senhas não coincidem!'); return;
@@ -356,15 +363,13 @@ async function cadastrarNovoUsuario() {
 
     _definirCarregando('btn-cadastrar-usuario', true, 'Cadastrando...');
 
-    // ── Chamada real ao back-end ──────────────────────────────────────────────
-    // TODO: o back-end deve criar o usuário e retornar { id, nomeCompleto, perfil }
     const resultado = await ApiAuth.cadastrar({
         nomeCompleto,
+        matricula,
         login: loginNovo,
         senha: senhaNova,
         perfil: perfilEscolhido,
     });
-    // ─────────────────────────────────────────────────────────────────────────
 
     _definirCarregando('btn-cadastrar-usuario', false, 'Cadastrar');
 
@@ -373,8 +378,6 @@ async function cadastrarNovoUsuario() {
     }
 
     fecharModalCadastro();
-
-    // Preenche o formulário de login automaticamente para facilitar o fluxo
     document.getElementById('input-login').value = loginNovo;
     document.getElementById('input-senha').value = senhaNova;
     selecionarPerfil(perfilEscolhido);
@@ -387,9 +390,8 @@ async function renderizarProjetosDoAluno() {
     const elementoLista = document.getElementById('lista-projetos-aluno');
     elementoLista.innerHTML = '<div class="carregando">Carregando projetos...</div>';
 
-    // ── Chamada real ao back-end ──────────────────────────────────────────────
-    // TODO: o back-end filtra automaticamente pelo aluno logado via JWT
-    const resultado = await ApiProjetos.listar();
+    // Busca apenas os projetos do aluno logado via JWT
+    const resultado = await ApiProjetos.meusProjetosAluno();
     // ─────────────────────────────────────────────────────────────────────────
 
     if (!resultado.ok) {
@@ -417,6 +419,7 @@ async function renderizarProjetosDoAluno() {
             <h4>${projeto.nome}</h4>
             <div class="linha-coordenador">👨‍🏫 Coordenador: <span>${projeto.coordenador}</span></div>
             <div class="quantidade-alunos">👥 ${projeto.alunos?.length ?? 0} aluno(s) participante(s)</div>
+            <div class="linha-campus">🏛 Campus: ${projeto.campus || '—'}    |     📚 Projeto de ${projeto.tipo || '—'}</div>
             <button class="btn-ver-detalhes"
                 onclick="verDetalhesProjetoAluno(${idx}); event.stopPropagation()">
                 Ver detalhes →
@@ -430,62 +433,192 @@ async function verDetalhesProjetoAluno(indiceProjeto) {
     irPara('tela-detalhe-aluno');
 }
 
-// ── FORMULÁRIO DE CADASTRO DE PROJETO ────────────────────────────────────────
-function inicializarFormularioProjeto() {
-    ['input-nome-projeto', 'input-nome-coordenador', 'input-data-inicio',
-        'input-data-fim', 'input-carga-horaria', 'input-descricao'].forEach(id => {
-            document.getElementById(id).value = '';
-        });
-    document.getElementById('select-campus').value = '';
-    document.getElementById('radio-ativo').checked = true;
-    document.getElementById('lista-campos-alunos').innerHTML = `
-        <div class="linha-aluno">
-            <input type="text" placeholder="Nome completo do aluno">
-            <button class="btn-remover-aluno" onclick="removerCampoAluno(this)">×</button>
-        </div>`;
+// ── MODAL DE PROJETOS ATIVOS (ALUNO) ─────────────────────────────────────────
+async function abrirProjetosAtivos() {
+    // Cria overlay se ainda não existir
+    let overlay = document.getElementById('overlay-projetos-ativos');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'overlay-projetos-ativos';
+        overlay.className = 'overlay-modal';
+        overlay.innerHTML = `
+            <div class="modal-projeto" style="max-width:720px">
+                <div class="modal-projeto-header">
+                    <strong style="font-size:1.05rem">📋 Projetos Ativos</strong>
+                    <button class="btn-fechar-modal" onclick="fecharProjetosAtivos()">✕</button>
+                </div>
+                <div id="conteudo-projetos-ativos" class="modal-projeto-conteudo"></div>
+            </div>`;
+        overlay.addEventListener('click', e => { if (e.target === overlay) fecharProjetosAtivos(); });
+        document.body.appendChild(overlay);
+    }
 
-    const aviso = document.getElementById('aviso-sucesso-cadastro');
-    aviso?.classList.remove('visivel');
-    const erroForm = document.getElementById('erro-cadastro-projeto');
-    erroForm?.classList.remove('visivel');
-}
+    overlay.classList.add('aberto');
+    const conteudo = document.getElementById('conteudo-projetos-ativos');
+    conteudo.innerHTML = '<div class="carregando">Carregando projetos ativos...</div>';
 
-function adicionarCampoAluno() {
-    const container = document.getElementById('lista-campos-alunos');
-    const novaLinha = document.createElement('div');
-    novaLinha.className = 'linha-aluno';
-    novaLinha.innerHTML = `
-        <input type="text" placeholder="Nome completo do aluno">
-        <button class="btn-remover-aluno" onclick="removerCampoAluno(this)">×</button>`;
-    container.appendChild(novaLinha);
-    novaLinha.querySelector('input').focus();
-}
+    const resultado = await ApiProjetos.projetosAtivos();
 
-function removerCampoAluno(botao) {
-    const todasLinhas = document.querySelectorAll('#lista-campos-alunos .linha-aluno');
-    if (todasLinhas.length <= 1) {
-        botao.closest('.linha-aluno').querySelector('input').value = '';
+    if (!resultado.ok) {
+        conteudo.innerHTML = `<div class="mensagem-erro-tela">⚠️ ${resultado.erro}</div>`;
         return;
     }
-    botao.closest('.linha-aluno').remove();
+
+    // IDs dos projetos que o aluno já participa (listaProjetos contém os projetos do aluno)
+    const idsDoAluno = new Set((listaProjetos ?? []).map(p => p.id));
+    const projetosOutros = resultado.data.filter(p => !idsDoAluno.has(p.id));
+
+    if (projetosOutros.length === 0) {
+        conteudo.innerHTML = `
+            <div class="mensagem-nenhum-projeto">
+                <div class="icone">🎉</div>
+                <h4>Você já participa de todos os projetos ativos!</h4>
+            </div>`;
+        return;
+    }
+
+    conteudo.innerHTML = projetosOutros.map(p => {
+        const tipoLabel = p.tipo === 'Pesquisa' ? 'Pesquisa' : 'Extensão';
+        return `
+            <div class="cartao-resultado-pesquisa">
+                <div class="resultado-cabecalho">
+                    <div class="resultado-nome">${p.nome}</div>
+                    <span class="badge-situacao ativo">🟢 Ativo</span>
+                </div>
+                <div class="resultado-meta">
+                    <span>👨‍🏫 ${p.coordenador || '—'}</span>
+                    <span>🏛 ${p.campus || '—'}</span>
+                    <span>📚 ${tipoLabel}</span>
+                    <span>👥 ${p.alunos?.length ?? 0} aluno(s)</span>
+                </div>
+                ${p.descricao ? `<div class="resultado-descricao">${p.descricao}</div>` : ''}
+            </div>`;
+    }).join('');
+}
+
+function fecharProjetosAtivos() {
+    document.getElementById('overlay-projetos-ativos')?.classList.remove('aberto');
+}
+
+// ── FORMULÁRIO DE CADASTRO DE PROJETO ────────────────────────────────────────
+function inicializarFormularioProjeto() {
+    ['input-nome-projeto', 'input-data-inicio',
+        'input-data-fim', 'input-carga-horaria', 'input-descricao'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+    document.getElementById('select-campus').value = '';
+    document.getElementById('select-tipo-projeto').value = '';
+    document.getElementById('radio-ativo').checked = true;
+
+    // Limpa alunos selecionados
+    alunosSelecionados = [];
+    _renderizarAlunosSelecionados('lista-alunos-selecionados');
+
+    document.getElementById('aviso-sucesso-cadastro')?.classList.remove('visivel');
+    document.getElementById('erro-cadastro-projeto')?.classList.remove('visivel');
+}
+
+// Renderiza os chips de alunos já adicionados em um container
+function _renderizarAlunosSelecionados(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    if (alunosSelecionados.length === 0) {
+        container.innerHTML = '<p class="texto-vazio" style="margin:4px 0 8px">Nenhum aluno adicionado</p>';
+        return;
+    }
+    container.innerHTML = alunosSelecionados.map(a => `
+        <div class="chip-aluno-selecionado">
+            <span>${a.nome} <small>(${a.matricula})</small></span>
+            <button onclick="removerAlunoSelecionado('${a.id}')" class="btn-remover-chip">×</button>
+        </div>`).join('');
+}
+
+function removerAlunoSelecionado(id) {
+    alunosSelecionados = alunosSelecionados.filter(a => a.id !== id);
+    _renderizarAlunosSelecionados('lista-alunos-selecionados');
+    // Atualiza também se modal de edição estiver aberto
+    _renderizarAlunosSelecionados('lista-alunos-selecionados-modal');
+}
+
+// ── MODAL DE BUSCA DE ALUNO ───────────────────────────────────────────────────
+async function abrirModalBuscaAluno(contexto = 'cadastro') {
+    _modalBuscaAlunoContexto = contexto;
+    await carregarTela('modal-busca-aluno');
+    document.getElementById('input-busca-aluno').value = '';
+    document.getElementById('resultado-busca-aluno').innerHTML =
+        '<div class="busca-placeholder">Digite para pesquisar...</div>';
+    document.getElementById('overlay-modal-busca-aluno').classList.add('aberto');
+    setTimeout(() => document.getElementById('input-busca-aluno').focus(), 100);
+}
+
+function fecharModalBuscaAluno() {
+    document.getElementById('overlay-modal-busca-aluno').classList.remove('aberto');
+}
+
+let _buscaAlunoTimeout = null;
+async function buscarAlunoModal(termo) {
+    clearTimeout(_buscaAlunoTimeout);
+    const container = document.getElementById('resultado-busca-aluno');
+
+    if (!termo || termo.length < 2) {
+        container.innerHTML = '<div class="busca-placeholder">Digite ao menos 2 caracteres...</div>';
+        return;
+    }
+
+    container.innerHTML = '<div class="busca-placeholder">Buscando...</div>';
+
+    _buscaAlunoTimeout = setTimeout(async () => {
+        const resultado = await ApiAlunos.buscar(termo);
+        if (!resultado.ok) {
+            container.innerHTML = `<div class="busca-placeholder">Erro: ${resultado.erro}</div>`;
+            return;
+        }
+        const alunos = resultado.data;
+        if (alunos.length === 0) {
+            container.innerHTML = '<div class="busca-placeholder">Nenhum aluno encontrado.</div>';
+            return;
+        }
+        container.innerHTML = alunos.map(a => {
+            const jaSelecionado = alunosSelecionados.some(s => s.id === a.id);
+            return `
+            <div class="item-resultado-busca ${jaSelecionado ? 'ja-adicionado' : ''}"
+                 onclick="${jaSelecionado ? '' : `selecionarAlunoModal('${a.id}','${a.nome.replace(/'/g, "\\'")}','${a.matricula}')`}">
+                <div class="item-busca-nome">${a.nome}</div>
+                <div class="item-busca-meta">Matrícula: ${a.matricula} · ${a.email}</div>
+                ${jaSelecionado ? '<span class="tag-adicionado">✓ Adicionado</span>' : ''}
+            </div>`;
+        }).join('');
+    }, 350);
+}
+
+function selecionarAlunoModal(id, nome, matricula) {
+    if (alunosSelecionados.some(a => a.id === id)) return;
+    alunosSelecionados.push({ id, nome, matricula });
+
+    const containerId = _modalBuscaAlunoContexto === 'edicao'
+        ? 'lista-alunos-selecionados-modal'
+        : 'lista-alunos-selecionados';
+    _renderizarAlunosSelecionados(containerId);
+
+    fecharModalBuscaAluno();
 }
 
 async function salvarProjeto() {
     const nomeProjeto = document.getElementById('input-nome-projeto').value.trim();
-    const nomeCoordenador = document.getElementById('input-nome-coordenador').value.trim();
     const campus = document.getElementById('select-campus').value;
+    const tipo = document.getElementById('select-tipo-projeto').value;
     const dataInicio = document.getElementById('input-data-inicio').value;
     const dataFim = document.getElementById('input-data-fim').value;
     const cargaHoraria = parseInt(document.getElementById('input-carga-horaria').value) || 0;
     const descricao = document.getElementById('input-descricao').value.trim();
     const situacao = document.querySelector('input[name="situacao-projeto"]:checked').value;
-    const alunos = [...document.querySelectorAll('#lista-campos-alunos .linha-aluno input')]
-        .map(c => c.value.trim()).filter(Boolean);
+    const alunos = alunosSelecionados.map(a => a.id);
 
     const erroForm = document.getElementById('erro-cadastro-projeto');
 
-    if (!nomeProjeto || !nomeCoordenador || !campus) {
-        exibirErro(erroForm, 'Preencha ao menos o nome do projeto, coordenador e campus.');
+    if (!nomeProjeto || !campus || !tipo) {
+        exibirErro(erroForm, 'Preencha ao menos o nome do projeto, o campus e o tipo.');
         return;
     }
     if (dataInicio && dataFim && dataFim < dataInicio) {
@@ -496,13 +629,10 @@ async function salvarProjeto() {
     erroForm?.classList.remove('visivel');
     _definirCarregando('btn-finalizar-cadastro', true, 'Salvando...');
 
-    // ── Chamada real ao back-end ──────────────────────────────────────────────
-    // TODO: o back-end deve criar o projeto e retornar o objeto criado com id
     const resultado = await ApiProjetos.criar({
-        nome: nomeProjeto, coordenador: nomeCoordenador, campus,
+        nome: nomeProjeto, campus, tipo,
         dataInicio, dataFim, cargaHoraria, descricao, situacao, alunos,
     });
-    // ─────────────────────────────────────────────────────────────────────────
 
     _definirCarregando('btn-finalizar-cadastro', false, '✓ Finalizar Cadastro');
 
@@ -564,12 +694,14 @@ function aplicarFiltroSituacao(situacao, abaClicada) {
 function renderizarListaProjetos() {
     const campusFiltrado = document.getElementById('select-filtro-campus').value;
     const coordenadorFiltrado = document.getElementById('select-filtro-coordenador').value;
+    const tipoFiltrado = document.getElementById('select-filtro-tipo').value;
 
     const projetosFiltrados = listaProjetos.filter(p => {
         const passaSituacao = filtroSituacaoAtivo === 'todos' || p.situacao === filtroSituacaoAtivo;
         const passaCampus = !campusFiltrado || p.campus === campusFiltrado;
         const passaCoordenador = !coordenadorFiltrado || p.coordenador === coordenadorFiltrado;
-        return passaSituacao && passaCampus && passaCoordenador;
+        const passaTipo = !tipoFiltrado || p.tipo === tipoFiltrado;
+        return passaSituacao && passaCampus && passaCoordenador && passaTipo;
     });
 
     document.getElementById('contador-resultados').textContent =
@@ -607,6 +739,7 @@ function renderizarListaProjetos() {
                 <div class="resultado-meta">
                     <span>👨‍🏫 ${projeto.coordenador}</span>
                     <span>🏛 ${projeto.campus || '—'}</span>
+                    <span>📚 ${projeto.tipo || '—'}</span>
                     ${periodoTexto ? `<span>${periodoTexto}</span>` : ''}
                     ${cargaTexto ? `<span>${cargaTexto}</span>` : ''}
                 </div>
@@ -639,7 +772,13 @@ async function abrirModalDetalheProjeto(idOuIndice) {
 
     projetoAtualModal = projeto;
     renderizarModalDetalhe(projeto);
-    document.getElementById('btn-editar-modal').style.display = '';
+
+    // Botões de edição apenas visíveis para o coordenador do projeto (professor logado)
+    const perfil = Auth.obterPerfil();
+    const ehCoordenador = perfil === 'professor' &&
+        (projeto.coordenadorId === Auth.usuarioAtual.id);
+    document.getElementById('btn-editar-modal').style.display = ehCoordenador ? '' : 'none';
+    document.getElementById('btn-excluir-modal').style.display = ehCoordenador ? '' : 'none';
     document.getElementById('btn-salvar-modal').style.display = 'none';
     document.getElementById('btn-cancelar-edicao-modal').style.display = 'none';
     document.getElementById('overlay-modal-projeto').classList.add('aberto');
@@ -656,10 +795,14 @@ function renderizarModalDetalhe(projeto) {
         ? '<span class="badge-situacao ativo">🟢 Ativo</span>'
         : '<span class="badge-situacao finalizado">⚫ Finalizado</span>';
 
-    const htmlAlunos = (projeto.alunos?.length ?? 0) > 0
-        ? projeto.alunos.map(nome => {
-            const iniciais = gerarIniciais(nome, false);
-            return `<div class="chip-aluno"><div class="avatar-chip-aluno">${iniciais}</div><span>${nome}</span></div>`;
+    const alunosValidos = (projeto.alunos ?? []).filter(a => a && (a.nome || typeof a === 'string'));
+    const htmlAlunos = alunosValidos.length > 0
+        ? alunosValidos.map(a => {
+            // Suporta tanto objeto { id, nome, matricula } quanto string legada
+            const nomeAluno = typeof a === 'string' ? a : a.nome;
+            const matricula = typeof a === 'object' && a.matricula ? ` <small>(${a.matricula})</small>` : '';
+            const iniciais = gerarIniciais(nomeAluno, false);
+            return `<div class="chip-aluno"><div class="avatar-chip-aluno">${iniciais}</div><span>${nomeAluno}${matricula}</span></div>`;
         }).join('')
         : '<span class="texto-vazio">Nenhum aluno cadastrado</span>';
 
@@ -739,21 +882,20 @@ function ativarModoEdicaoModal() {
     const projeto = projetoAtualModal;
     if (!projeto) return;
 
+    // Carrega alunos atuais do projeto no cache de seleção
+    alunosSelecionados = (projeto.alunos ?? [])
+        .filter(a => a.id)
+        .map(a => ({ id: a.id, nome: a.nome, matricula: a.matricula }));
+
     const opcoesStatus = ['ativo', 'finalizado'].map(s =>
         `<option value="${s}" ${projeto.situacao === s ? 'selected' : ''}>${s === 'ativo' ? '🟢 Ativo' : '⚫ Finalizado'}</option>`
     ).join('');
 
-    const opcoesAlunos = (projeto.alunos ?? []).map(nome =>
-        `<div class="linha-aluno">
-            <input type="text" value="${nome}" placeholder="Nome completo do aluno">
-            <button class="btn-remover-aluno" onclick="removerCampoAluno(this)">×</button>
-        </div>`
-    ).join('');
+    const listaCampus = ['Anápolis', 'Ceres', 'Goianésia', 'Goiânia'];
 
-    const listaCampus = ['Anápolis — CET', 'Goiânia — ESEFFEGO', 'Goiânia — Laranjeiras',
-        'Inhumas', 'Itapuranga', 'Iporá', 'Jussara', 'Morrinhos', 'Palmeiras de Goiás',
-        'Pires do Rio', 'Porangatu', 'Quirinópolis', 'São Luís de Montes Belos',
-        'Uruaçu', 'Formosa', 'Goiás', 'Cora Coralina'];
+    const opcoesTipo = ['Pesquisa', 'Extensao'].map(t =>
+        `<option value="${t}" ${projeto.tipo === t ? 'selected' : ''}>${t === 'Pesquisa' ? 'Projeto de Pesquisa' : 'Projeto de Extensão'}</option>`
+    ).join('');
 
     document.getElementById('modal-projeto-conteudo').innerHTML = `
         <div class="modal-proj-cabecalho">
@@ -765,16 +907,18 @@ function ativarModoEdicaoModal() {
                 <input type="text" id="edit-nome" value="${projeto.nome}" placeholder="Nome do projeto">
             </div>
             <div class="campo-form">
-                <label>Coordenador</label>
-                <input type="text" id="edit-coordenador" value="${projeto.coordenador}" placeholder="Nome do coordenador">
-            </div>
-            <div class="campo-form">
                 <label>Campus</label>
                 <div class="container-select">
                     <select id="edit-campus">
                         <option value="">Selecione o campus</option>
                         ${listaCampus.map(c => `<option value="${c}" ${projeto.campus === c ? 'selected' : ''}>${c}</option>`).join('')}
                     </select>
+                </div>
+            </div>
+            <div class="campo-form">
+                <label>Tipo do Projeto</label>
+                <div class="container-select">
+                    <select id="edit-tipo">${opcoesTipo}</select>
                 </div>
             </div>
             <div class="linha-dupla">
@@ -805,13 +949,13 @@ function ativarModoEdicaoModal() {
             </div>
             <div class="campo-form">
                 <label>Alunos</label>
-                <div id="lista-campos-alunos-modal">
-                    ${opcoesAlunos || `<div class="linha-aluno"><input type="text" placeholder="Nome completo do aluno"><button class="btn-remover-aluno" onclick="removerCampoAluno(this)">×</button></div>`}
-                </div>
-                <button class="btn-adicionar-aluno" onclick="adicionarCampoAlunoModal()">+ Adicionar aluno</button>
+                <div id="lista-alunos-selecionados-modal"></div>
+                <button class="btn-adicionar-aluno" onclick="abrirModalBuscaAluno('edicao')">+ Adicionar aluno</button>
             </div>
             <div id="erro-edicao-modal" class="mensagem-erro"></div>
         </div>`;
+
+    _renderizarAlunosSelecionados('lista-alunos-selecionados-modal');
 
     document.getElementById('btn-excluir-modal').style.display = 'none';
     document.getElementById('btn-editar-modal').style.display = 'none';
@@ -819,40 +963,31 @@ function ativarModoEdicaoModal() {
     document.getElementById('btn-cancelar-edicao-modal').style.display = '';
 }
 
-function adicionarCampoAlunoModal() {
-    const container = document.getElementById('lista-campos-alunos-modal');
-    const novaLinha = document.createElement('div');
-    novaLinha.className = 'linha-aluno';
-    novaLinha.innerHTML = `
-        <input type="text" placeholder="Nome completo do aluno">
-        <button class="btn-remover-aluno" onclick="removerCampoAluno(this)">×</button>`;
-    container.appendChild(novaLinha);
-    novaLinha.querySelector('input').focus();
-}
-
 function cancelarEdicaoModal() {
+    alunosSelecionados = [];
     renderizarModalDetalhe(projetoAtualModal);
-    document.getElementById('btn-excluir-modal').style.display = '';
-    document.getElementById('btn-editar-modal').style.display = '';
+    const ehCoordenador = Auth.obterPerfil() === 'professor' &&
+        projetoAtualModal?.coordenadorId === Auth.usuarioAtual.id;
+    document.getElementById('btn-excluir-modal').style.display = ehCoordenador ? '' : 'none';
+    document.getElementById('btn-editar-modal').style.display = ehCoordenador ? '' : 'none';
     document.getElementById('btn-salvar-modal').style.display = 'none';
     document.getElementById('btn-cancelar-edicao-modal').style.display = 'none';
 }
 
 async function salvarEdicaoModal() {
     const nome = document.getElementById('edit-nome').value.trim();
-    const coordenador = document.getElementById('edit-coordenador').value.trim();
     const campus = document.getElementById('edit-campus').value;
+    const tipo = document.getElementById('edit-tipo').value;
     const dataInicio = document.getElementById('edit-data-inicio').value;
     const dataFim = document.getElementById('edit-data-fim').value;
     const cargaHoraria = parseInt(document.getElementById('edit-carga').value) || 0;
     const situacao = document.getElementById('edit-situacao').value;
     const descricao = document.getElementById('edit-descricao').value.trim();
-    const alunos = [...document.querySelectorAll('#lista-campos-alunos-modal .linha-aluno input')]
-        .map(i => i.value.trim()).filter(Boolean);
+    const alunos = alunosSelecionados.map(a => a.id);
     const elementoErro = document.getElementById('erro-edicao-modal');
 
-    if (!nome || !coordenador || !campus) {
-        elementoErro.textContent = 'Preencha ao menos o nome, coordenador e campus.';
+    if (!nome || !campus || !tipo) {
+        elementoErro.textContent = 'Preencha ao menos o nome, o campus e o tipo.';
         elementoErro.classList.add('visivel'); return;
     }
     if (dataInicio && dataFim && dataFim < dataInicio) {
@@ -862,12 +997,8 @@ async function salvarEdicaoModal() {
 
     _definirCarregando('btn-salvar-modal', true, 'Salvando...');
 
-    const dadosAtualizados = { nome, coordenador, campus, dataInicio, dataFim, cargaHoraria, descricao, situacao, alunos };
-
-    // ── Chamada real ao back-end ──────────────────────────────────────────────
-    // TODO: o back-end deve atualizar o projeto e retornar o objeto atualizado
+    const dadosAtualizados = { nome, campus, tipo, dataInicio, dataFim, cargaHoraria, descricao, situacao, alunos };
     const resultado = await ApiProjetos.atualizar(idProjetoModal, dadosAtualizados);
-    // ─────────────────────────────────────────────────────────────────────────
 
     _definirCarregando('btn-salvar-modal', false, '💾 Salvar alterações');
 
@@ -876,16 +1007,17 @@ async function salvarEdicaoModal() {
         elementoErro.classList.add('visivel'); return;
     }
 
-    // Atualiza cache local com os dados retornados (ou com o que enviamos)
     projetoAtualModal = resultado.data ?? dadosAtualizados;
+    alunosSelecionados = [];
 
     renderizarModalDetalhe(projetoAtualModal);
-    document.getElementById('btn-excluir-modal').style.display = '';
-    document.getElementById('btn-editar-modal').style.display = '';
+    const ehCoordenadorPos = Auth.obterPerfil() === 'professor' &&
+        projetoAtualModal?.coordenadorId === Auth.usuarioAtual.id;
+    document.getElementById('btn-excluir-modal').style.display = ehCoordenadorPos ? '' : 'none';
+    document.getElementById('btn-editar-modal').style.display = ehCoordenadorPos ? '' : 'none';
     document.getElementById('btn-salvar-modal').style.display = 'none';
     document.getElementById('btn-cancelar-edicao-modal').style.display = 'none';
 
-    // Atualiza a lista atrás da modal
     await _carregarProjetosParaPesquisa();
 }
 
@@ -896,8 +1028,10 @@ function renderizarDetalhesProjeto(projeto, idAreaDestino, destacarAlunoLogado) 
     const nomeAlunoLogado = (Auth.obterPerfil() === 'aluno')
         ? Auth.usuarioAtual.nomeCompleto.toLowerCase() : '';
 
-    const htmlAlunos = (projeto.alunos?.length ?? 0) > 0
-        ? projeto.alunos.map(nomeAluno => {
+    const alunosValidos = (projeto.alunos ?? []).filter(a => a && (a.nome || typeof a === 'string'));
+    const htmlAlunos = alunosValidos.length > 0
+        ? alunosValidos.map(a => {
+            const nomeAluno = typeof a === 'string' ? a : a.nome;
             const iniciais = gerarIniciais(nomeAluno, false);
             const ehLogado = destacarAlunoLogado && nomeAluno.toLowerCase() === nomeAlunoLogado;
             return `
@@ -1050,6 +1184,12 @@ function exibirErro(elementoErro, mensagem) {
 // ── FUNÇÕES LEGADAS (compatibilidade) ────────────────────────────────────────
 // Mantidas para não quebrar chamadas que possam existir em outros lugares
 function preencherDadosProfessor(iniciais, nomeCompleto) { _preencherBarraProfessor(nomeCompleto); }
+
+// Mostra/esconde o campo de matrícula no modal de cadastro conforme o perfil
+function alternarCampoMatricula(perfil) {
+    const campo = document.getElementById('campo-matricula');
+    if (campo) campo.style.display = perfil === 'aluno' ? '' : 'none';
+}
 function preencherDadosAluno(iniciais, nomeCompleto) { _preencherBarraAluno(nomeCompleto); }
 function mostrarDetalheProfessor(indiceProjeto) { abrirModalDetalheProjeto(indiceProjeto); }
 function abrirDetalhePesquisa(indiceProjeto) { abrirModalDetalheProjeto(indiceProjeto); }

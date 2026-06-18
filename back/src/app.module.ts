@@ -1,18 +1,10 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
-
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-
 import { Neo4jModule } from './neo4j/neo4j.module';
 import { ProfessorModule } from './professor/professor.module';
-
+import { AlunoModule } from './aluno/aluno.module';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
@@ -21,32 +13,18 @@ import { ProjetoModule } from './projeto/projeto.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-
+    ConfigModule.forRoot({ isGlobal: true }),
     ProfessorModule,
+    AlunoModule,
     Neo4jModule,
     AuthModule,
-    ProjetoModule
+    ProjetoModule,
   ],
   controllers: [AppController],
-  providers: [AppService, {
-    provide:APP_GUARD,
-    useClass:JwtAuthGuard
-  }],
+  providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
 })
 export class AppModule implements NestModule {
-
-  configure(
-    consumer: MiddlewareConsumer,
-  ) {
-    consumer
-      .apply(LoggerMiddleware)
-      .forRoutes({
-        path: '*',
-        method: RequestMethod.ALL,
-      });
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL });
   }
-
 }

@@ -25,41 +25,33 @@
       <!-- ── SEÇÃO 1: IDENTIFICAÇÃO ── -->
       <div class="secao-formulario">
         <div class="titulo-secao-form">📋 Identificação</div>
-
         <div class="campo">
           <label>Nome do Projeto</label>
           <input type="text" id="input-nome-projeto" placeholder="Ex: Pesquisa em Biotecnologia Regional">
         </div>
-
-        <div class="campo">
-          <label>Nome do Coordenador</label>
-          <input type="text" id="input-nome-coordenador" placeholder="Ex: Prof. Dr. Carlos Lima">
-        </div>
-
         <div class="campo">
           <label>Campus</label>
           <div class="container-select">
             <select id="select-campus">
               <option value="">Selecione o campus...</option>
-              <option>Anápolis — CET</option>
-              <option>Goiânia — ESEFFEGO</option>
-              <option>Goiânia — Laranjeiras</option>
-              <option>Inhumas</option>
-              <option>Itapuranga</option>
-              <option>Iporá</option>
-              <option>Jussara</option>
-              <option>Morrinhos</option>
-              <option>Palmeiras de Goiás</option>
-              <option>Pires do Rio</option>
-              <option>Porangatu</option>
-              <option>Quirinópolis</option>
-              <option>São Luís de Montes Belos</option>
-              <option>Uruaçu</option>
-              <option>Formosa</option>
-              <option>Goiás</option>
-              <option>Cora Coralina</option>
+              <option>Anápolis</option>
+              <option>Ceres</option>
+              <option>Goianésia</option>
+              <option>Goiânia</option>
             </select>
           </div>
+        </div>
+      </div>
+
+      <!-- ── SEÇÃO TIPO -->
+      <div class="campo">
+        <label>Tipo do Projeto</label>
+        <div class="container-select">
+          <select id="select-tipo-projeto">
+            <option value="">Selecione...</option>
+            <option value="Pesquisa">Projeto de Pesquisa</option>
+            <option value="Extensao">Projeto de Extensão</option>
+          </select>
         </div>
       </div>
 
@@ -76,7 +68,6 @@
             <input type="date" id="input-data-fim">
           </div>
         </div>
-
         <div class="campo">
           <label>Carga Horária Total (horas)</label>
           <input type="number" id="input-carga-horaria" placeholder="Ex: 120" min="1">
@@ -87,10 +78,9 @@
       <div class="secao-formulario">
         <div class="campo">
           <label>Descrição do Projeto</label>
-          <textarea id="input-descricao"
-            placeholder="Descreva os objetivos, metodologia e resultados esperados do projeto..." rows="4"></textarea>
+          <textarea id="input-descricao" placeholder="Descreva os objetivos, metodologia e resultados esperados..."
+            rows="4"></textarea>
         </div>
-
         <div class="campo">
           <label>Situação</label>
           <div class="grupo-radio">
@@ -111,17 +101,18 @@
       <!-- ── SEÇÃO 4: ALUNOS ── -->
       <div class="secao-formulario">
         <div class="titulo-secao-form">👥 Alunos Participantes</div>
-
-        <div id="lista-campos-alunos"></div>
-
-        <button class="btn-adicionar-aluno" onclick="adicionarCampoAluno()">
+        <!-- Lista de alunos já adicionados -->
+        <div id="lista-alunos-selecionados"></div>
+        <!-- Botão abre o modal de busca -->
+        <button class="btn-adicionar-aluno" onclick="abrirModalBuscaAluno('cadastro')">
           <span class="icone-mais">+</span> Adicionar aluno
         </button>
       </div>
 
       <div id="erro-cadastro-projeto" class="caixa-erro"></div>
-      <button class="btn-finalizar-cadastro" id="btn-finalizar-cadastro" onclick="salvarProjeto()">✓ Finalizar
-        Cadastro</button>
+      <button class="btn-finalizar-cadastro" id="btn-finalizar-cadastro" onclick="salvarProjeto()">
+        ✓ Finalizar Cadastro
+      </button>
     </div>
   </div>
 </div>

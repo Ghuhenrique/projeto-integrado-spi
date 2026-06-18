@@ -2,38 +2,46 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { ProfessorService } from 'src/professor/professor.service';
+import { AlunoService } from 'src/aluno/aluno.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private professorService: ProfessorService,
+    private alunoService: AlunoService,
     private jwtService: JwtService,
   ) {}
 
   async login(loginDto: LoginDto) {
-    const user = await this.professorService.validateUser(
-      loginDto.email,
-      loginDto.password,
-    );
+    // Tenta professor primeiro, depois aluno
+    let user = await this.professorService.validateUser(loginDto.email, loginDto.password);
+    let perfil = 'professor';
 
     if (!user) {
-      throw new UnauthorizedException('login errado: Credenciais inválidas');
+      user = await this.alunoService.validateUser(loginDto.email, loginDto.password);
+      perfil = 'aluno';
     }
 
-    const payload = { sub: user.id, email: user.email };
-    
+    if (!user) {
+      throw new UnauthorizedException('Credenciais inválidas');
+    }
+
+    const payload = { sub: user.id, email: user.email, perfil };
+
     return {
       access_token: this.jwtService.sign(payload),
       user: {
         id: user.id,
-        name: user.name,
+        name: user.nome,
         email: user.email,
+        perfil,
+        // matrícula só existe para aluno
+        matricula: user.matricula ?? undefined,
       },
     };
   }
 
   async logout(userId: string) {
-    // Por enquanto, apenas retorna sucesso (cliente deve descartar o token)
     return { message: 'Logout realizado com sucesso' };
   }
 
